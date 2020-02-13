@@ -19,18 +19,17 @@ import Carousel, { Pagination } from 'react-native-snap-carousel'
 import Layout from 'constants/Layout'
 import { Text } from 'react-native-paper'
 import { BlurView } from '@react-native-community/blur'
+import LinearGradient from 'react-native-linear-gradient'
 
 import { withTheme } from 'react-native-paper'
 import { withNavigation } from 'react-navigation'
 import { useTranslation } from 'react-i18next'
 
-const PostCarousel = (
-  ref,
+const CarouselPostItem = ({
   theme,
   handleScrollPrev,
   handleScrollNext,
-) => ({
-  item: post,
+  post,
   index,
 }) => {
   const styling = styles(theme)
@@ -62,6 +61,44 @@ const PostCarousel = (
   )
 }
 
+const CarouselMoreItem = ({
+  theme,
+  post,
+  index,
+}) => {
+  const styling = styles(theme)
+
+  return (
+    <View style={styling.carouselItem}>
+      <LinearGradient
+        colors={[`${theme.colors.backgroundSecondary}10`, `${theme.colors.backgroundSecondary}`]}
+        style={styling.gradient}
+      />
+
+      <ListItemComponent post={post}>
+        <View style={styling.more}>
+          <Text>View More posts</Text>
+        </View>
+      </ListItemComponent>
+    </View>
+  )
+}
+
+const CarouselPost = (
+  theme,
+  handleScrollPrev,
+  handleScrollNext,
+) => ({
+  item: post,
+  index,
+}) => {
+  if (path(['mediaObjects', 'length'])(post)) {
+    return <CarouselPostItem theme={theme} handleScrollPrev={handleScrollPrev} handleScrollNext={handleScrollNext} post={post} />
+  } else {
+    return <CarouselMoreItem theme={theme} handleScrollPrev={handleScrollPrev} handleScrollNext={handleScrollNext} post={post} />
+  }
+}
+
 const PostComponent = ({
   theme,
   navigation,
@@ -86,7 +123,21 @@ const PostComponent = ({
 
   const ref = useRef(null)
   const carouselRef = useRef(null)
-  const albumLength = path(['album', 'posts', 'items', 'length'])(post) || 0
+  const albumLength = (() => {
+    const length = path(['album', 'posts', 'items', 'length'])(post) || 0
+    if (length <= 4) {
+      return length
+    }
+    return 5
+  })()
+  const albumItems = (() => {
+    const length = path(['album', 'posts', 'items', 'length'])(post) || 0
+    const items = path(['album', 'posts', 'items'])(post)
+    if (length <= 4) {
+      return items
+    }
+    return items.slice(0, 4).concat({})
+  })()
   const firstItem = albumLength ?
     path(['album', 'posts', 'items'])(post).findIndex(item => item.postId === post.postId) :
     null
@@ -110,8 +161,8 @@ const PostComponent = ({
         <Carousel
           firstItem={firstItem}
           ref={carouselRef}
-          data={path(['album', 'posts', 'items'])(post)}
-          renderItem={PostCarousel(carouselRef, theme, handleScrollPrev, handleScrollNext)}
+          data={albumItems}
+          renderItem={CarouselPost(theme, handleScrollPrev, handleScrollNext)}
           sliderWidth={Layout.window.width}
           itemWidth={Layout.window.width}
           removeClippedSubviews={false}
@@ -213,6 +264,11 @@ const styles = theme => StyleSheet.create({
   },
   gradient: {
     ...StyleSheet.absoluteFill,
+  },
+  more: {
+    ...StyleSheet.absoluteFill,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 })
 

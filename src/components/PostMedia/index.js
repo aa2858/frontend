@@ -69,7 +69,7 @@ const PostMedia = ({
     }
 
     return [path(['data'])(postsSingleGet)]
-  })()
+  })().slice(0, 6)
 
   const onViewableItemsChangedRef = useRef(onViewableItemsChanged)
   const viewabilityConfigRef = useRef({
@@ -93,7 +93,7 @@ const PostMedia = ({
         bounces={false}
         ref={feedRef}
         keyExtractor={item => item.postId}
-        data={flatListData.slice(0, 6)}
+        data={flatListData}
         onViewableItemsChanged={onViewableItemsChangedRef.current}
         viewabilityConfig={viewabilityConfigRef.current}
         renderItem={({ item: post, index }) => (
@@ -121,7 +121,7 @@ const PostMedia = ({
             }}
             handleScrollNext={() => {
               const nextIndex = index + 1
-              if (nextIndex > 5) return
+              if (nextIndex > flatListData.length - 1) return
               feedRef.current.scrollToIndex({
                 index: nextIndex,
               })

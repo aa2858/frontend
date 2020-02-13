@@ -15,7 +15,6 @@ import { useTranslation } from 'react-i18next'
 
 const formSchema = Yup.object().shape({
   name: Yup.string().min(1).max(50).required(),
-  description: Yup.string().min(1).max(50).required(),
 })
 
 const AlbumCreateForm = ({
@@ -30,10 +29,6 @@ const AlbumCreateForm = ({
     <View style={styling.root}>
       <View style={styling.input}>
         <Field name="name" component={TextField} placeholder={t('Album Name')} />
-      </View>
-
-      <View style={styling.input}>
-        <Field name="description" component={TextField} placeholder={t('Album Description')} />
       </View>
 
       <View style={styling.input}>
